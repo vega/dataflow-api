@@ -1,17 +1,28 @@
 # dataflow-api
 
-JavaScript API for dataflow processing.
+JavaScript API for dataflow processing using the [vega-dataflow](https://github.com/vega/vega-dataflow) reactive engine. Perform common database operations (sorting, filtering, aggregation, window calculations) over JavaScript objects. Build and compose transformation pipelines over streaming data.
 
 ## Installing
 
-If you use NPM, `npm install dataflow-api`. Otherwise, download the [latest release](https://github.com/vega/dataflow-api/releases/latest). You can also load directly from GitHub as a [standalone library](https://vega.github.io/dataflow-api/dataflow-api.v1.min.js). AMD, CommonJS, and vanilla environments are supported. In vanilla, a `df` global is exported:
+If you use NPM, `npm install dataflow-api`. Otherwise, download the [latest release](https://github.com/vega/dataflow-api/releases/latest). You can also load directly from GitHub as a [standalone library](https://vega.github.io/vega/dataflow-api/dataflow-api.v1.min.js). AMD, CommonJS, and vanilla environments are supported. In vanilla, a `df` global is exported:
 
 ```html
 <script src="https://vega.github.io/dataflow-api/dataflow-api.v0.min.js"></script>
 <script>
+var flow = df.dataflow([
+  df.aggregate()
+    .groupby(['category'])
+    .measure([df.count(), df.sum('amount').as('sum')])
+]);
 
-var flow = df.dataflow();
+flow.insert([
+  {category: 'a', amount: 12},
+  {category: 'a', amount: 5},
+  {category: 'b', amount: 11}
+]);
 
+// [{category: 'a', count: 2, sum: 17}, {category: 'b', count: 1, sum: 11}]
+console.log(flow.values());
 </script>
 ```
 
