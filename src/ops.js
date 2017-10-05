@@ -1,11 +1,5 @@
-function getset(api, obj, name) {
-  api[name] = function(_) {
-    return arguments.length ? (obj[name] = _, api) : obj[name];
-  };
-}
-
-function method(op) {
-  const obj = {op: op},
+function apiObject(base) {
+  const obj = base || {},
         api = {toObject: () => obj};
 
   getset(api, obj, 'as');
@@ -16,48 +10,58 @@ function method(op) {
   return api;
 }
 
-function p0(type) { return () => method(type); }
-export const count = p0('count');
-export const row_number = p0('row_number');
-export const rank = p0('rank');
-export const dense_rank = p0('dense_rank');
-export const percent_rank = p0('percent_rank');
-export const cume_dist = p0('cume_dist');
-
-function pf(type) {
-  return (field) => method(type, 'field').field(field);
+function getset(api, obj, name) {
+  api[name] = function(_) {
+    return arguments.length ? (obj[name] = _, api) : obj[name];
+  };
 }
-export const valid = pf('valid');
-export const missing = pf('missing');
-export const distinct = pf('distinct');
-export const min = pf('min');
-export const max = pf('max');
-export const argmin = pf('argmin');
-export const argmax = pf('argmax');
-export const sum = pf('sum');
-export const mean = pf('mean');
-export const average = pf('average');
-export const variance = pf('variance');
-export const variancep = pf('variancep');
-export const stdev = pf('stdev');
-export const stdevp = pf('stdevp');
-export const stderr = pf('stderr');
-export const median = pf('median');
-export const q1 = pf('q1');
-export const q3 = pf('q3');
-export const ci0 = pf('ci0');
-export const ci1 = pf('ci1');
-export const first_value = pf('first_value');
-export const last_value = pf('last_value');
 
-function pfp(type) {
-  return (field, param) => method(type, 'field', 'param').field(field).param(param);
-}
-export const lag = pfp('lag');
-export const lead = pfp('lead');
-export const nth_value = pfp('nth_value');
+export const field = (f => apiObject({field: f}));
 
-function pp(type) {
-  return (param) => method(type, 'param').param(param);
+export const expr = (f => apiObject({accessor: f}, 'fields'));
+
+function op0(type) { return () => apiObject({op: type}); }
+export const count = op0('count');
+export const row_number = op0('row_number');
+export const rank = op0('rank');
+export const dense_rank = op0('dense_rank');
+export const percent_rank = op0('percent_rank');
+export const cume_dist = op0('cume_dist');
+
+function opField(type) {
+  return (field) => apiObject({op: type}, 'field').field(field);
 }
-export const ntile = pp('ntile');
+export const valid = opField('valid');
+export const missing = opField('missing');
+export const distinct = opField('distinct');
+export const min = opField('min');
+export const max = opField('max');
+export const argmin = opField('argmin');
+export const argmax = opField('argmax');
+export const sum = opField('sum');
+export const mean = opField('mean');
+export const average = opField('average');
+export const variance = opField('variance');
+export const variancep = opField('variancep');
+export const stdev = opField('stdev');
+export const stdevp = opField('stdevp');
+export const stderr = opField('stderr');
+export const median = opField('median');
+export const q1 = opField('q1');
+export const q3 = opField('q3');
+export const ci0 = opField('ci0');
+export const ci1 = opField('ci1');
+export const first_value = opField('first_value');
+export const last_value = opField('last_value');
+
+function opFieldParam(type) {
+  return (field, param) => apiObject({op: type}, 'field', 'param').field(field).param(param);
+}
+export const lag = opFieldParam('lag');
+export const lead = opFieldParam('lead');
+export const nth_value = opFieldParam('nth_value');
+
+function opParam(type) {
+  return (param) => apiObject({op: type}, 'param').param(param);
+}
+export const ntile = opParam('ntile');

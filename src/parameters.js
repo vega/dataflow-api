@@ -1,18 +1,14 @@
+import {aggregate, window} from 'vega-transforms';
 import {
-  array, compare, error, field,
+  accessor, array, compare, error, field,
   isArray, isObject, isFunction, isRegExp, isString,
   toBoolean, toNumber, toSet, toString
 } from 'vega-util';
 
 const Ascending = 'ascending',
-      Descending = 'descending';
-      // AggregateOps = toSet([
-      //   'count', 'valid', 'missing', 'distinct',
-      //   'sum', 'mean', 'average',
-      //   'variance', 'variancep', 'stdev', 'stdevp', 'stderr',
-      //   'median', 'q1', 'q3', 'ci0', 'ci1',
-      //   'min', 'max', 'argmin', 'argmax'
-      // ]);
+      Descending = 'descending',
+      AggregateOps = toSet(aggregate.Definition.params[1].values),
+      WindowOps = toSet(window.Definition.params[2].values);
 
 export function parser(p) {
   const type = p.array ? 'array' : p.type;
@@ -38,11 +34,15 @@ export const TypeParsers = {
 
   compare: p => (value => {
     let cmp = value;
-    if (isFunction(cmp)) return cmp;
+    if (cmp && isFunction(cmp.toObject)) {
+      cmp = cmp.toObject();
+    }
     if (isString(cmp)) cmp = array(cmp);
     if (isArray(cmp)) cmp = toCompareObject(cmp);
-    return isObject(cmp)
-      ? compare(cmp.fields, cmp.orders)
+    return isObject(cmp) && !isFunction(cmp)
+      ? isFunction(cmp.accessor)
+        ? accessor(cmp.accessor, cmp.fields)
+        : compare(cmp.fields, cmp.orders)
       : error(`Unrecognized comparator value for parameter: ${p.name}.`);
   }),
 
@@ -52,14 +52,13 @@ export const TypeParsers = {
       : error(`Invalid parameter value '${value+''}' for ${p.name}. Must be one of [${p.values}].`);
   },
 
-  expr: p => (value => isFunction(value) ? value
-    : error(`Invalid parameter value '${value+''}' for ${p.name}.`)),
+  expr: p => (value => toExpr(value) || error(`Invalid parameter value '${value+''}' for ${p.name}.`)),
 
   field: p => (value => toField(value) || error(`Invalid parameter value '${value+''}' for ${p.name}.`)),
 
-  measure: () => toMeasure,
+  measure: () => (list => toMeasure(list, AggregateOps)),
 
-  window: () => toWindow,
+  window: () => (list => toMeasure(list, WindowOps)),
 
   boolean: () => toBoolean,
 
@@ -100,47 +99,40 @@ function toCompareObject(array) {
   return {fields: fields, orders: orders};
 }
 
-function toField(value) {
-  return isFunction(value) ? value
-    : isString(value) ? field(value)
-    : isObject(value) ? field(value.field, value.name)
+function toExpr(value) {
+  if (value && isFunction(value.toObject)) {
+    value = value.toObject();
+  }
+  // TODO: isString -> parse expression
+  return isObject(value) && !isFunction(value)
+    ? accessor(value.accessor, value.fields, value.as)
     : null;
 }
 
-function toMeasure(list) {
-  let ops = [], fields = [], as = [];
-
-  for (let measure of list) {
-    if (measure.toObject) {
-      measure = measure.toObject();
-    }
-
-    let op = toString(measure.op);
-    // if (!AggregateOps.hasOwnProperty(op)) {
-    //   error(`Invalid aggregate operation: ${op}.`);
-    // }
-    ops.push(op);
-
-    fields.push(toField(measure.field));
-
-    as.push(measure.as ? toString(measure.as) : null);
+function toField(value) {
+  if (value && isFunction(value.toObject)) {
+    value = value.toObject();
   }
-
-  return {ops: ops, fields: fields, as: as};
+  return isString(value) ? field(value)
+    : isObject(value) && !isFunction(value)
+    ? isFunction(value.accessor)
+      ? accessor(value.accessor, value.fields, value.as)
+      : field(value.field, value.as)
+    : null;
 }
 
-function toWindow(list) {
+function toMeasure(list, validOps) {
   let ops = [], fields = [], as = [], params = [];
 
   for (let measure of list) {
-    if (measure.toObject) {
+    if (isFunction(measure.toObject)) {
       measure = measure.toObject();
     }
 
     let op = toString(measure.op);
-    // if (!AggregateOps.hasOwnProperty(op)) {
-    //   error(`Invalid aggregate operation: ${op}.`);
-    // }
+    if (!validOps.hasOwnProperty(op)) {
+      error(`Invalid operation: ${op}.`);
+    }
     ops.push(op);
 
     params.push(toNumber(measure.param));
@@ -150,5 +142,7 @@ function toWindow(list) {
     as.push(measure.as ? toString(measure.as) : null);
   }
 
-  return {ops: ops, fields: fields, as: as, params: []};
+  return params.every(v => v == null)
+    ? {ops: ops, fields: fields, as: as}
+    : {ops: ops, fields: fields, as: as, params: params};
 }

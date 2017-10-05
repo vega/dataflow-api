@@ -1,5 +1,38 @@
 var tape = require('tape'),
-    df = require('../');
+    df = require('../'),
+    expr = df.expr(d => 1 + d.foo * d.foo, ['foo']);
+
+tape('Dataflow supports listener', function(test) {
+  const input = [
+    {foo: 0, bar: 'a'},
+    {foo: 1, bar: 'a'},
+    {foo: 2, bar: 'b'},
+    {foo: 3, bar: 'b'}
+  ];
+
+  let count = 0;
+
+  const f = function(values) {
+    test.equal(values.length, 4);
+    test.equal(count, 0);
+    ++count;
+    if (count === 1) {
+      flow.off(f).on(g).insert({foo: 4, bar: 'c'});
+    }
+  };
+
+  const g = function(values) {
+    test.equal(values.length, 5);
+    test.equal(count, 1);
+    test.end();
+  };
+
+  const flow = df.dataflow([
+    df.formula('baz', expr)
+  ]);
+
+  flow.on(f).insert(input);
+});
 
 tape('Dataflow supports derived flows', function(test) {
   const input = [
@@ -22,7 +55,7 @@ tape('Dataflow supports derived flows', function(test) {
 
   // create derived flow, ensure appropriate methods defined
   const flow2 = df.dataflow(flow1, [
-    df.formula('baz', d => 1 + d.foo * d.foo)
+    df.formula('baz', expr)
   ]);
   test.ok(!flow2.insert);
   test.ok(!flow2.remove);

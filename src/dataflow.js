@@ -1,10 +1,9 @@
+import {default as df} from './runtime';
 import collect from './transforms/collect';
-import {Dataflow} from 'vega-dataflow';
 import {relay, sieve} from 'vega-transforms';
-import {array, Warn} from 'vega-util';
+import {array} from 'vega-util';
 
-let df = new Dataflow().logLevel(Warn),
-    Output = Symbol('dataflow-output');
+const Output = Symbol('dataflow-output');
 
 export default function(datasource, transforms) {
   return arguments.length < 2
@@ -23,7 +22,9 @@ function create(datasource, transforms) {
 
   const object = {
     [Output]: () => output,
-    values: get
+    values: get,
+    on: f => (df.addDataListener(values, f), object),
+    off: f => (df.removeDataListener(values, f), object)
   };
 
   if (!datasource) {

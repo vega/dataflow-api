@@ -5,7 +5,7 @@ import {extend} from 'vega-util';
 
 const def = extend({}, window.Definition);
 
-def.params = removeParams(def.params, ['ops', 'fields', 'as', 'param']);
+def.params = removeParams(def.params, ['ops', 'fields', 'as', 'params']);
 def.params = extendParams(def.params, {
   sort: { alias: 'compare' }
 });

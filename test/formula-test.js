@@ -10,7 +10,7 @@ tape('Formula transform adds derived field to data', function(test) {
   ];
 
   const flow = df.dataflow([
-    df.formula('baz', d => 1 + d.foo * d.foo)
+    df.formula('baz', df.expr(d => 1 + d.foo * d.foo).fields(['foo']))
   ]);
 
   const output = flow.insert(input).values();

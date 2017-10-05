@@ -10,7 +10,7 @@ tape('Filter transform filters data', function(test) {
   ];
 
   const flow = df.dataflow([
-    df.filter(d => d.foo > 1)
+    df.filter(df.expr(d => d.foo > 1).fields(['foo']))
   ]);
 
   const output = flow.insert(input).values();
