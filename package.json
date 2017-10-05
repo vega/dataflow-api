@@ -23,6 +23,7 @@
   },
   "scripts": {
     "build": "npm run test",
+    "postbuild": "uglifyjs build/dataflow-api.js -c -m -o build/dataflow-api.min.js",
     "pretest": "rm -rf build && mkdir build && rollup -g d3-array:d3,vega-dataflow:vega,vega-transforms:vega.transforms,vega-statistics:vega,vega-util:vega -f umd -n df -o build/dataflow-api.js -- index.js",
     "test": "tape 'test/**/*-test.js' && eslint index.js src test",
     "prepublish": "npm run build",
@@ -37,6 +38,7 @@
     "eslint": "4",
     "rollup": "0.43",
     "rollup-plugin-node-resolve": "3",
-    "tape": "4"
+    "tape": "4",
+    "uglify-es": "3"
   }
 }
