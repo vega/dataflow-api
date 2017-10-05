@@ -89,7 +89,7 @@ Removes a listener _callback_ function that was added using the [on](#dataflow_o
 
 Transform operators that process data within a dataflow:
 
-* [aggregate](#aggregate) - Group and summarize data object.
+* [aggregate](#aggregate) - Group and summarize data objects.
 * [bin](#bin) - Discretize numeric values into uniform bins.
 * [countpattern](#countpattern) - Count the frequency of patterns in text strings.
 * [filter](#filter) - Filter a data stream using a predicate expression.
