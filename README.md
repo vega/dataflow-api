@@ -305,7 +305,7 @@ df.joinaggregate(['category'], [
 df.<b>project</b>([<i>fields</i>])
 [<>](https://github.com/vega/dataflow-api/blob/master/src/transforms/project.js "Source")
 
-Creates a new **project** transform specification. The project transform performs a [relational algebra projection operation](https://en.wikipedia.org/wiki/Projection_(relational_algebra). Thie transform produces a stream of new data objects that include one or more fields of the source stream, with the data fields optionally renamed. The optional argument _fields_ is a shorthand for the corresponding parameter method.
+Creates a new **project** transform specification. The project transform performs a [relational algebra projection operation](https://en.wikipedia.org/wiki/Projection_(relational_algebra)). Thie transform produces a stream of new data objects that include one or more fields of the source stream, with the data fields optionally renamed. The optional argument _fields_ is a shorthand for the corresponding parameter method.
 
 #### Example Use
 
