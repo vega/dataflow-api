@@ -1,6 +1,6 @@
 {
   "name": "dataflow-api",
-  "version": "0.0.1",
+  "version": "0.1.0",
   "description": "JavaScript API for dataflow processing",
   "keywords": [
     "vega",
@@ -16,29 +16,30 @@
   },
   "main": "build/dataflow-api.js",
   "module": "index",
-  "jsnext:main": "index",
+  "unpkg": "build/dataflow-api.min.js",
+  "jsdelivr": "build/dataflow-api.min.js",
   "repository": {
     "type": "git",
     "url": "https://github.com/vega/dataflow-api.git"
   },
   "scripts": {
-    "build": "npm run test",
-    "postbuild": "uglifyjs build/dataflow-api.js -c -m -o build/dataflow-api.min.js",
+    "build": "yarn test",
+    "postbuild": "terser build/dataflow-api.js -c -m -o build/dataflow-api.min.js",
     "pretest": "rm -rf build && mkdir build && rollup -c",
     "test": "tape 'test/**/*-test.js' && eslint index.js src test",
-    "prepublish": "npm run build",
+    "prepublish": "yarn build",
     "postpublish": "git push && git push --tags && zip -j build/dataflow-api.zip -- LICENSE README.md build/dataflow-api.js"
   },
   "dependencies": {
-    "vega-dataflow": "3",
-    "vega-transforms": "1",
-    "vega-util": "1"
+    "vega-dataflow": "^4.1.0",
+    "vega-transforms": "^2.3.1",
+    "vega-util": "^1.8.0"
   },
   "devDependencies": {
-    "eslint": "4",
-    "rollup": "0.50",
-    "rollup-plugin-node-resolve": "3",
+    "eslint": "5",
+    "rollup": "1.2.2",
+    "rollup-plugin-node-resolve": "4",
     "tape": "4",
-    "uglify-es": "3"
+    "terser": "3"
   }
 }
